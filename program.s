@@ -14,11 +14,10 @@ RESET: ; Reset routine
   TXS ; initialize stack
   LDX #$00 ; return to prior value
   JSR ZPINIT1 ; End of reset routine,
-MAIN:
   JSR FROMRESET1
   CLI
-  LDX #$00 ; setup writeseq subroutine
-  JMP WRITESEQ
+MAIN:
+  JMP WRITESEQPREP
 ZPINIT1: ; initialize values into the zeropage
   LDA LOADGRAPHICS,X ; load value
   BEQ ZPPREP2 ; if value is $0, jump to ZPPREP2
@@ -44,15 +43,18 @@ ZPINIT3:
 INITRETURN:
   RTS
 
+WRITESEQPREP:
+  LDX #$00 ; initalize indexing registers
+  LDY #$00
 WRITESEQ: ; writing RAM values
   LDA VALUES,Y ; lookup table of assorted values
   BEQ YRESET ; if A=$0, store $0 in Y
-  STA $0400,X ; indexed to allow to loop
-  INX
+  STA $0400,X ; indexed to allow to loop until $FF
+  INX ; increment indexing registers
   INY
-  JMP WRTSEQ2
+  JMP WRTSEQ2 ; skip yreset
 YRESET:
-  TAY ; because A=0, transfer 0 to Y
+  TAY ; because A=0 when this is run, transfer 0 to Y
 WRTSEQ2:
   CPX #$FF ; checks if finished
   BEQ MAIN ; if equal, branch back to the reset subroutine
@@ -60,7 +62,7 @@ WRTSEQ2:
 
 FROMRESET1: ; sets up "graphics"
   SEI ; ensure no interrupts
-  LDX #$00
+  LDX #$00 ; initialize indexing register
 FROMRESETLOOP1:
   LDA GRAPHICS,X
   STA $2006 ;would-be NES PPUADDR register
@@ -72,33 +74,29 @@ FROMRESET2: ; write "graphics" data
   BEQ RESETRETURN ; return from subroutine if $0
   STA $2007 ; store at would-be NES PPUDATA register
   INX
-JMP FROMRESET2
+  JMP FROMRESET2
 RESETRETURN:
   RTS ; return to finish reset routine
 
- .segment "IRQROUTINE"
+.segment "IRQROUTINE"
 IRQROUTINE:
   PHA ; Saves write (if applicable)
-  TYA
-  PHA ; Saves value from loops in case in loop
-  TXA ; saves indexing register
-  PHA
+  PHY ; Saves y from loops in case in loop
+  PHX ; saves indexing register
   PHP ; saves processor status in case of changes
   LDY #$00 ; initialize Y register for indexing
 IRQLOOP: ; writing loop of assorted values
   LDA IRQVALUES,Y ; lookup table, see zero-page at beginning of file
   BEQ IRQEND ; if $0, end loop and return to prior processor status
-  STA $06A0,Y
+  STA $0300,Y
   INY
   JMP IRQLOOP
 IRQEND:
   PLP ; pull processor status back
-  PLA ; pull value of X register
-  TAX
-  PLA ; pull value of Y register prior to IRQ back
-  TAY ; transfer to Y
+  PLX ; pull value of X register
+  PLY ; pull value of Y register prior to IRQ back
   PLA ; pull value of accumulator prior to IRQ back
   RTI ; return to prior code
 
-  .segment "VECTORS"
+.segment "VECTORS"
 VECTORS: .word IRQROUTINE, RESET, IRQROUTINE ; self explanatory, vectors for IRQ, RST, and NMI
