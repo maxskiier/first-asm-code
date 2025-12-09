@@ -6,6 +6,7 @@
 LOADGRAPHICS: .byte $40, $3B, $58, $79, $F4, $5E, $00
 LOADVALUES: .byte $77, $57, $F1, $0F, $E2, $4C, $92, $5E, $D1, $FB, $22, $B5, $00
 LOADIRQVALUES: .byte $32, $7F, $A2, $CC, $BF, $F2, $DA, $00
+LOADSTRINGDATA: .asciiz "Hello, world!"
 
 RESET: ; Reset routine
   SEI ; Ensure no interrupts can come in while writing to stack
@@ -15,9 +16,12 @@ RESET: ; Reset routine
   LDX #$00 ; return to prior value
   JSR ZPINIT1 ; End of reset routine,
   JSR FROMRESET1
+  JSR PRINTSTRING
   CLI
 MAIN:
-  JMP WRITESEQPREP
+  LDX #$00
+  LDY #$00
+  JMP WRITESEQ
 ZPINIT1: ; initialize values into the zeropage
   LDA LOADGRAPHICS,X ; load value
   BEQ ZPPREP2 ; if value is $0, jump to ZPPREP2
@@ -36,16 +40,21 @@ ZPPREP3:
   LDX #$00 ;  reinitialize X
 ZPINIT3:
   LDA LOADIRQVALUES,X ; load values
-  BEQ INITRETURN ; if value loaded is $0, return from subroutine
+  BEQ ZPPREP4 ; if value loaded is $0, jump to ZPPREP4
   STA IRQVALUES,X ; otherwise, store that value
   INX
   JMP ZPINIT3 ; and loop
+ZPPREP4:
+  LDX #00 ; reinitialize X
+ZPINIT4:
+  LDA LOADSTRINGDATA,X ; load string data
+  BEQ INITRETURN ; if value loaded is $0, return from subroutine
+  STA STRINGDATA,X
+  INX
+  JMP ZPINIT4
 INITRETURN:
   RTS
 
-WRITESEQPREP:
-  LDX #$00 ; initalize indexing registers
-  LDY #$00
 WRITESEQ: ; writing RAM values
   LDA VALUES,Y ; lookup table of assorted values
   BEQ YRESET ; if A=$0, store $0 in Y
@@ -57,7 +66,7 @@ YRESET:
   TAY ; because A=0 when this is run, transfer 0 to Y
 WRTSEQ2:
   CPX #$FF ; checks if finished
-  BEQ MAIN ; if equal, branch back to the reset subroutine
+  BEQ RESET ; if equal, branch back to the reset subroutine
   JMP WRITESEQ ; otherwise, loop
 
 FROMRESET1: ; sets up "graphics"
@@ -77,6 +86,15 @@ FROMRESET2: ; write "graphics" data
   JMP FROMRESET2
 RESETRETURN:
   RTS ; return to finish reset routine
+
+PRINTSTRING:
+  LDX #$00
+PRINTSTRINGLOOP:
+  LDA STRINGDATA,X
+  BEQ RESETRETURN
+  STA $5000,X
+  INX
+  JMP PRINTSTRINGLOOP
 
 .segment "IRQROUTINE"
 .ifdef C02
