@@ -3,7 +3,11 @@ IRQROUTINE:
   PHY ; Saves y from loops in case in loop
   PHX ; saves indexing register
   PHP ; saves processor status in case of changes
-  LDY #$00 ; initialize Y register for indexing
+  PHP ; transfer processor status to A
+  LDY #$00 ; initialize y register for indexing
+  PLA ; pull processor status to A
+  STA TESTLOC ; store to TESTLOC for bit testing
+  BBS4 TESTLOC, CHKSTATUS ; if yes, output processor status to monitor
 IRQLOOP: ; writing loop of assorted values
   LDA IRQVALUES,Y ; lookup table, see zero-page at beginning of file
   BEQ IRQEND ; if $0, end loop and return to prior processor status
@@ -16,4 +20,8 @@ IRQEND:
   PLY ; pull value of Y register prior to IRQ back
   PLA ; pull value of accumulator prior to IRQ back
   RTI ; return to prior code
-
+CHKSTATUS: ; break code
+  PHP ; push processor status
+  PLA ; pull processor status into A
+  STA $5000 ; would be serial interface, output processor status to it
+  BRA IRQEND ; branch always, end IRQ
