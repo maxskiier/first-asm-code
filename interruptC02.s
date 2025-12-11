@@ -21,7 +21,5 @@ IRQEND:
   PLA ; pull value of accumulator prior to IRQ back
   RTI ; return to prior code
 CHKSTATUS: ; break code
-  PHP ; push processor status
-  PLA ; pull processor status into A
   STA $5000 ; would be serial interface, output processor status to it
   BRA IRQEND ; branch always, end IRQ

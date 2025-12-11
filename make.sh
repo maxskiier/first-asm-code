@@ -5,14 +5,14 @@ while true; do
 
     if [[ "$ans" == "y" || "$ans" == "Y" ]]; then
         echo "65C02 mode selected"
-        ./ca65 program.s -D C02
-        ./ld65 program.o -C program.cfg
+        ./ca65 defines.s -D C02
+        ./ld65 defines.o -C program.cfg
         break
 
     elif [[ "$ans" == "n" || "$ans" == "N" ]]; then
         echo "6502 mode selected"
-        ./ca65 program.s
-        ./ld65 program.o -C program.cfg
+        ./ca65 defines.s
+        ./ld65 defines.o -C program.cfg
         break
 
     else

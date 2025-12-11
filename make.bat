@@ -12,12 +12,12 @@ goto :start
 
 :C02mode
 echo 65C02 mode selected
-.\ca65 program.s -D C02
-.\ld65 program.o -C program.cfg
+.\ca65 defines.s -D C02
+.\ld65 defines.o -C program.cfg
 goto :eof
 
 :regmode
 echo 6502 mode selected
-.\ca65 program.s
-.\ld65 program.o -C program.cfg
+.\ca65 defines.s
+.\ld65 defines.o -C program.cfg
 goto :eof
