@@ -27,4 +27,4 @@ IRQEND:
   PLA ; pull value of accumulator prior to IRQ back
   RTI ; return to prior code
 BREAK:
-  RTS ; placeholder for now
+  RTI ; placeholder for now
