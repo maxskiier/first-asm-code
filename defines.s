@@ -9,16 +9,16 @@ LOADIRQVALUES: .byte $32, $7F, $A2, $CC, $BF, $F2, $DA, $00
 LOADSTRINGDATA: .asciiz "Hello, world!"
 
 .ifdef C02
-.include "programC02.s"
+.include "./progcode/programC02.s"
 .else
-.include "program.s"
+.include ".progcode/program.s"
 .endif
 
 .segment "IRQROUTINE"
 .ifdef C02
-.include "interruptC02.s"
+.include "./interruptcode/interruptC02.s"
 .else
-.include "interrupt.s"
+.include "./interruptcode/interrupt.s"
 .endif
 
 .segment "VECTORS"
