@@ -5,6 +5,11 @@ IRQROUTINE:
   TXA
   PHA ; saves indexing register
   PHP ; saves processor status in case of changes
+  PHP ; push and pull to A to check for break flag
+  PLA
+  AND #%00010000 ; check for break flag
+  CMP #%00010000
+  BEQ BREAK
   LDY #$00 ; initialize Y register for indexing
   LDX #$00 ; reserved for future use
 IRQLOOP: ; writing loop of assorted values
@@ -21,4 +26,5 @@ IRQEND:
   TAY
   PLA ; pull value of accumulator prior to IRQ back
   RTI ; return to prior code
-
+BREAK:
+  RTS ; placeholder for now
