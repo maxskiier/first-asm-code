@@ -64,25 +64,25 @@ FROMRESET1: ; sets up "graphics"
   LDX #$00 ; initialize indexing register
 FROMRESETLOOP1:
   LDA GRAPHICS,X
-  STA $2006 ;would-be NES PPUADDR register
-  INX
+  STA $210,X ; example address
+  INX ; increment X
   CPX #$02 ; compare to hex 2, (when it should be done)
   BNE FROMRESETLOOP1 ; loop if not equal, otherwise proceed to second graphics loop
 FROMRESET2: ; write "graphics" data
   LDA GRAPHICS,X ; load the value
   BEQ RESETRETURN ; return from subroutine if $0
-  STA $2007 ; store at would-be NES PPUDATA register
-  INX
-  BRA FROMRESET2
+  STA $220,X ; another example address
+  INX ; increment X
+  BRA FROMRESET2 ; branch always, loop
 RESETRETURN:
   RTS ; return to finish reset routine
 
 PRINTSTRING:
-  LDX #$00
+  LDX #$00 ; initialize indexing register
 PRINTSTRINGLOOP:
-  LDA STRINGDATA,X
-  BEQ RESETRETURN
-  STA $5000,X
-  INX
-  BRA PRINTSTRINGLOOP
+  LDA STRINGDATA,X ; load string values
+  BEQ RESETRETURN ; checks if 0, return from subroutine if so
+  STA $5000,X ; example serial interface
+  INX ; increment
+  BRA PRINTSTRINGLOOP ; branch always and loop
 
