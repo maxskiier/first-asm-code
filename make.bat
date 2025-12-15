@@ -1,6 +1,7 @@
 @echo off
 :start
 cls
+set /p asmpath="What directory are ca65 and ld65 located in?"
 set /p C02choice="Do you want to make this in 65C02 mode? (y/n):"
 
 if /I "%C02choice%"=="y" goto :C02mode
@@ -12,12 +13,12 @@ goto :start
 
 :C02mode
 echo 65C02 mode selected
-.\ca65 defines.s -D C02
-.\ld65 defines.o -C program.cfg
+asmpath\ca65 defines.s -D C02
+asmpath\ld65 defines.o -C program.cfg
 goto :eof
 
 :regmode
 echo 6502 mode selected
-.\ca65 defines.s
-.\ld65 defines.o -C program.cfg
+asmpath\ca65 defines.s
+asmpath\ld65 defines.o -C program.cfg
 goto :eof
