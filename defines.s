@@ -11,7 +11,7 @@ LOADSTRINGDATA: .asciiz "Hello, world!"
 .ifdef C02
 .include "./progcode/programC02.s"
 .else
-.include ".progcode/program.s"
+.include "./progcode/program.s"
 .endif
 
 .segment "IRQROUTINE"
